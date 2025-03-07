@@ -1,0 +1,45 @@
+import { headers as getHeaders } from 'next/headers'
+import { getPayload } from 'payload'
+import React from 'react'
+import { Inter } from 'next/font/google'
+
+import config from '@/payload.config'
+
+import './styles.css' // Updated import path
+import { Navbar } from '@/components/ui/navbar'
+import { Footer } from '@/components/ui/footer'
+import { Shell } from '@/components/ui/shell'
+
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata = {
+  title: 'NYC Running Hub',
+  description: 'Connect with running clubs, events, and resources in New York City.',
+}
+
+interface FrontendLayoutProps {
+  children: React.ReactNode
+}
+
+export default async function FrontendLayout({ children }: FrontendLayoutProps) {
+  const headers = await getHeaders()
+  const payloadConfig = await config
+  const payload = await getPayload({ config: payloadConfig })
+  const { user } = await payload.auth({ headers })
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <div className="relative min-h-screen flex flex-col antialiased">
+          <Navbar user={user} />
+          <main className="flex-1">
+            <Shell>
+              {children}
+            </Shell>
+          </main>
+          <Footer />
+        </div>
+      </body>
+    </html>
+  )
+}
