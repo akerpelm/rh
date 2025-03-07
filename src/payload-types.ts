@@ -180,6 +180,7 @@ export interface RunClub {
   name: string;
   description: string;
   borough: number | Borough;
+  primaryNeighborhood?: (number | null) | Neighborhood;
   neighborhoods: (number | Neighborhood)[];
   /**
    * Add meeting locations first before creating schedule entries
@@ -202,6 +203,15 @@ export interface RunClub {
     | {
         day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
         time: string;
+        meetingLocation: {
+          name: string;
+          address: string;
+          neighborhood: number | Neighborhood;
+          coordinates?: {
+            latitude?: string | null;
+            longitude?: string | null;
+          };
+        };
         runType: 'easy' | 'long' | 'workout' | 'recovery' | 'shakeout' | 'race-pace' | 'hills' | 'track' | 'social';
         distance?: {
           min?: number | null;
@@ -410,6 +420,7 @@ export interface RunClubsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   borough?: T;
+  primaryNeighborhood?: T;
   neighborhoods?: T;
   meetingLocations?:
     | T
@@ -429,6 +440,19 @@ export interface RunClubsSelect<T extends boolean = true> {
     | {
         day?: T;
         time?: T;
+        meetingLocation?:
+          | T
+          | {
+              name?: T;
+              address?: T;
+              neighborhood?: T;
+              coordinates?:
+                | T
+                | {
+                    latitude?: T;
+                    longitude?: T;
+                  };
+            };
         runType?: T;
         distance?:
           | T

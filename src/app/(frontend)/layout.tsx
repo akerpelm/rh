@@ -9,6 +9,7 @@ import './styles.css' // Updated import path
 import { Navbar } from '@/components/ui/navbar'
 import { Footer } from '@/components/ui/footer'
 import { Shell } from '@/components/ui/shell'
+import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,9 +34,8 @@ export default async function FrontendLayout({ children }: FrontendLayoutProps) 
         <div className="relative min-h-screen flex flex-col antialiased">
           <Navbar user={user} />
           <main className="flex-1">
-            <Shell>
-              {children}
-            </Shell>
+            <Shell>{children}</Shell>
+            <Toaster />
           </main>
           <Footer />
         </div>

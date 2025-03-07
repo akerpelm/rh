@@ -30,6 +30,21 @@ export const RunClubs: CollectionConfig = {
       hasMany: false,
     },
     {
+      name: 'primaryNeighborhood',
+      type: 'relationship',
+      relationTo: 'neighborhoods',
+      required: false,
+      hasMany: false,
+      filterOptions: ({ data }) => {
+        if (data?.borough) {
+          return {
+            borough: { equals: data.borough },
+          }
+        }
+        return false
+      },
+    },
+    {
       name: 'neighborhoods',
       type: 'relationship',
       relationTo: 'neighborhoods',
@@ -38,10 +53,10 @@ export const RunClubs: CollectionConfig = {
       filterOptions: ({ data }) => {
         if (data?.borough) {
           return {
-            borough: { equals: data.borough }
+            borough: { equals: data.borough },
           }
         }
-        return false;
+        return false
       },
     },
     {
@@ -112,6 +127,49 @@ export const RunClubs: CollectionConfig = {
           type: 'text',
           label: 'Time',
           required: true,
+        },
+        {
+          name: 'meetingLocation',
+          type: 'group',
+          label: 'Meeting Location',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              label: 'Location Name',
+              required: true,
+            },
+            {
+              name: 'address',
+              type: 'text',
+              label: 'Address',
+              required: true,
+            },
+            {
+              name: 'neighborhood',
+              type: 'relationship',
+              relationTo: 'neighborhoods',
+              required: true,
+              hasMany: false,
+            },
+            {
+              name: 'coordinates',
+              type: 'group',
+              label: 'Coordinates',
+              fields: [
+                {
+                  name: 'latitude',
+                  type: 'text',
+                  label: 'Latitude',
+                },
+                {
+                  name: 'longitude',
+                  type: 'text',
+                  label: 'Longitude',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'runType',
