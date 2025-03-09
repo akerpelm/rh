@@ -1,40 +1,34 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
-import { columns, type ScheduledRun } from './weekly-schedule/columns'
+import { columns, type ScheduleItem } from './weekly-schedule/columns'
 import { DataTable } from './weekly-schedule/data-table'
+import { transformRunClubData } from '@/lib/utils/payload-transforms'
 
-async function getRunSchedule(): Promise<ScheduledRun[]> {
+async function getRunSchedule(): Promise<ScheduleItem[]> {
   const payload = await getPayload({ config: await config })
 
   const response = await payload.find({
     collection: 'run-clubs',
-    depth: 2,
-    // where: {
-    //   runClub.schedule: {
-    //     exists: true,
-    //   },
-    // },
+    depth: 3,
+    where: {
+      'schedule.day': {
+        not_equals: null,
+      },
+    },
   })
 
-  const runs: ScheduledRun[] = response.docs.flatMap((club) =>
+  const transformedDocs = response.docs.map(transformRunClubData)
+
+  return transformedDocs.flatMap((club) =>
     (club.schedule || []).map((run) => ({
+      ...run,
       id: `${club.id}-${run.day}-${run.time}`,
-      clubId: club.id,
-      clubName: club.name || '',
+      clubId: String(club.id),
+      clubName: club.name,
       clubLogo: club.logo,
-      day: run.day,
-      time: run.time,
-      runType: run.runType,
-      distance: run.distance,
-      pace: run.pace,
-      details: run.details,
-      requiresRSVP: run.requiresRSVP || false,
-      maxParticipants: run.maxParticipants,
-      meetingLocation: run.meetingLocation,
+      slug: club.slug,
     })),
   )
-
-  return runs
 }
 
 export default async function WeeklySchedule() {

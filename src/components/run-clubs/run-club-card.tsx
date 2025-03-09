@@ -7,19 +7,22 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ensureValidURL } from '@/lib/utils/urls'
 import { RunClub } from '@/payload-types'
+import { ensureBorough, ensureMedia } from '@/lib/utils/payload-transforms'
 
 interface RunClubCardProps {
   club: RunClub
 }
 
 export function RunClubCard({ club }: RunClubCardProps) {
+  const logo = ensureMedia(club.logo)
+  const borough = ensureBorough(club.borough)
   return (
     <Card>
       <CardContent className="p-6">
         <div className="flex gap-4 mb-4">
-          {club.logo ? (
+          {logo?.url ? (
             <div className="relative h-16 w-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-              <Image src={club.logo.url} alt={club.name} fill className="object-contain" />
+              <Image src={logo.url} alt={club.name} fill className="object-contain" />
             </div>
           ) : (
             <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -32,7 +35,7 @@ export function RunClubCard({ club }: RunClubCardProps) {
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-bold text-lg line-clamp-1">{club.name}</h3>
               <Badge variant="secondary" className="flex-shrink-0">
-                {club.borough.name}
+                {borough?.name}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
@@ -93,7 +96,7 @@ export function RunClubCard({ club }: RunClubCardProps) {
               </Link>
             )}
             <Button variant="outline" size="sm" className="ml-auto" asChild>
-              <Link href={`/run-clubs/${club.id}`}>View Details</Link>
+              <Link href={`/run-clubs/${club.slug}`}>View Details</Link>
             </Button>
           </div>
         </div>

@@ -30,13 +30,13 @@ export function getStatusConfig(status: RunStatus) {
     case 'soon':
       return {
         label: 'Starting Soon',
-        variant: 'warning' as const,
+        variant: 'default' as const,
         icon: '🟡',
       }
     case 'upcoming':
       return {
         label: 'Today',
-        variant: 'primary' as const,
+        variant: 'default' as const,
         icon: '🟢',
       }
     default:
@@ -46,4 +46,12 @@ export function getStatusConfig(status: RunStatus) {
         icon: '⚫',
       }
   }
+}
+
+export function formatDate(date: string | Date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }

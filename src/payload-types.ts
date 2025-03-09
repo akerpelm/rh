@@ -178,27 +178,13 @@ export interface Media {
 export interface RunClub {
   id: number;
   name: string;
+  /**
+   * Auto-generated from name
+   */
+  slug?: string | null;
   description: string;
   borough: number | Borough;
   primaryNeighborhood?: (number | null) | Neighborhood;
-  neighborhoods: (number | Neighborhood)[];
-  /**
-   * Add meeting locations first before creating schedule entries
-   */
-  meetingLocations?:
-    | {
-        locationName: string;
-        address: string;
-        coordinates?: {
-          latitude?: string | null;
-          longitude?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Add meeting locations before adding schedule entries
-   */
   schedule?:
     | {
         day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
@@ -247,6 +233,66 @@ export interface RunClub {
     strava?: string | null;
   };
   logo?: (number | null) | Media;
+  /**
+   * Hex color code (e.g., #FF5733)
+   */
+  brandColor?: string | null;
+  clubRecords?:
+    | {
+        athleteName?: string | null;
+        event?: ('mile' | '5k' | '10k' | 'half' | 'marathon') | null;
+        time?: string | null;
+        date?: string | null;
+        eventName?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  gallery?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        featured?: boolean | null;
+        category?: ('runs' | 'social' | 'race' | 'community') | null;
+        id?: string | null;
+      }[]
+    | null;
+  clubCulture?: {
+    postRunTraditions?: ('coffee' | 'breakfast' | 'stretch' | 'social')[] | null;
+    atmosphere?:
+      | ('no-drop' | 'pace-groups' | 'all-levels' | 'beginner' | 'photos' | 'dog-friendly' | 'stroller')[]
+      | null;
+    customTraditions?:
+      | {
+          name: string;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  partnerBusinesses?:
+    | {
+        businessName: string;
+        type: 'running-store' | 'coffee' | 'pt' | 'restaurant' | 'gym' | 'other';
+        perks?: string | null;
+        location?: {
+          address?: string | null;
+          neighborhood?: (number | null) | Neighborhood;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  routes?:
+    | {
+        name: string;
+        distance?: number | null;
+        description?: string | null;
+        stravaLink?: string | null;
+        difficulty?: ('easy' | 'moderate' | 'hard') | null;
+        terrain?: ('road' | 'trail' | 'track' | 'hills')[] | null;
+        mapImage?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -418,23 +464,10 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface RunClubsSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   description?: T;
   borough?: T;
   primaryNeighborhood?: T;
-  neighborhoods?: T;
-  meetingLocations?:
-    | T
-    | {
-        locationName?: T;
-        address?: T;
-        coordinates?:
-          | T
-          | {
-              latitude?: T;
-              longitude?: T;
-            };
-        id?: T;
-      };
   schedule?:
     | T
     | {
@@ -489,6 +522,65 @@ export interface RunClubsSelect<T extends boolean = true> {
         strava?: T;
       };
   logo?: T;
+  brandColor?: T;
+  clubRecords?:
+    | T
+    | {
+        athleteName?: T;
+        event?: T;
+        time?: T;
+        date?: T;
+        eventName?: T;
+        id?: T;
+      };
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        featured?: T;
+        category?: T;
+        id?: T;
+      };
+  clubCulture?:
+    | T
+    | {
+        postRunTraditions?: T;
+        atmosphere?: T;
+        customTraditions?:
+          | T
+          | {
+              name?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  partnerBusinesses?:
+    | T
+    | {
+        businessName?: T;
+        type?: T;
+        perks?: T;
+        location?:
+          | T
+          | {
+              address?: T;
+              neighborhood?: T;
+            };
+        id?: T;
+      };
+  routes?:
+    | T
+    | {
+        name?: T;
+        distance?: T;
+        description?: T;
+        stravaLink?: T;
+        difficulty?: T;
+        terrain?: T;
+        mapImage?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -8,52 +8,18 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { capitalize } from 'lodash'
 import { getRunStatus, getStatusConfig, RunStatus } from '@/lib/utils/date'
+import { RunClub, Media, Neighborhood, Borough } from '@/payload-types'
+import { isMedia, isNeighborhood, isBorough, ensureMedia } from '@/lib/utils/payload-transforms'
 
-export type ScheduledRun = {
-  id: string // Changed from number to string since we're constructing it
+type ScheduleItem = NonNullable<RunClub['schedule']>[number] & {
+  id: string
+  slug: string
   clubId: string
   clubName: string
-  clubLogo?: { url: string }
-  day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
-  time: string
-  runType:
-    | 'easy'
-    | 'long'
-    | 'workout'
-    | 'recovery'
-    | 'shakeout'
-    | 'race-pace'
-    | 'hills'
-    | 'track'
-    | 'social'
-  distance?: {
-    min?: number
-    max?: number
-  }
-  pace?: {
-    min?: string
-    max?: string
-  }
-  details?: string
-  requiresRSVP: boolean
-  maxParticipants?: number
-  meetingLocation: {
-    name: string
-    address: string
-    neighborhood: {
-      id: string
-      name: string
-      slug: string
-      borough: {
-        id: string
-        name: string
-        slug: string
-      }
-    }
-  }
+  clubLogo?: Media
 }
 
-export const columns: ColumnDef<ScheduledRun>[] = [
+export const columns: ColumnDef<ScheduleItem>[] = [
   {
     accessorKey: 'day',
     header: ({ column }) => (
@@ -73,14 +39,16 @@ export const columns: ColumnDef<ScheduledRun>[] = [
     header: 'Club',
     cell: ({ row }) => {
       const club = row.original
+      const logo = ensureMedia(club.clubLogo)
+
       return (
         <Link
-          href={`/run-clubs/${club.clubId}`}
+          href={`/run-clubs/${club.slug}`}
           className="flex items-center gap-2 hover:text-primary"
         >
-          {club.clubLogo ? (
+          {logo?.url ? (
             <div className="relative h-6 w-6 rounded-full overflow-hidden">
-              <Image src={club.clubLogo.url} alt={club.clubName} fill className="object-cover" />
+              <Image src={logo.url} alt={club.clubName} fill className="object-cover" />
             </div>
           ) : (
             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -116,7 +84,7 @@ export const columns: ColumnDef<ScheduledRun>[] = [
     accessorKey: 'distance',
     header: 'Distance',
     cell: ({ row }) => {
-      const distance = row.getValue('distance') as ScheduledRun['distance']
+      const distance = row.getValue('distance') as ScheduleItem['distance']
       if (distance?.min == null || distance?.max == null) return '-'
       return `${distance.min}-${distance.max}mi`
     },
@@ -125,7 +93,7 @@ export const columns: ColumnDef<ScheduledRun>[] = [
     accessorKey: 'pace',
     header: 'Pace',
     cell: ({ row }) => {
-      const pace = row.getValue('pace') as ScheduledRun['pace']
+      const pace = row.getValue('pace') as ScheduleItem['pace']
       if (!pace?.min || !pace?.max) return '-'
       return `${pace.min}-${pace.max}/mi`
     },
@@ -135,17 +103,30 @@ export const columns: ColumnDef<ScheduledRun>[] = [
     header: 'Location',
     cell: ({ row }) => {
       const location = row.original.meetingLocation
-      if (!location?.neighborhood) return '-'
+      const neighborhood =
+        location?.neighborhood && isNeighborhood(location.neighborhood)
+          ? location.neighborhood
+          : undefined
+
+      if (!neighborhood || !isBorough(neighborhood.borough)) return '-'
+
       return (
         <div>
-          <div className="font-medium">{location.neighborhood.borough.name}</div>
-          <div className="text-xs text-muted-foreground">{location.neighborhood.name}</div>
+          <div className="font-medium">{neighborhood.borough.name}</div>
+          <div className="text-xs text-muted-foreground">{neighborhood.name}</div>
         </div>
       )
     },
     filterFn: (row, id, value) => {
       if (value === 'all') return true
-      return row.original.meetingLocation.neighborhood.borough.name === value
+      const location = row.original.meetingLocation
+      const neighborhood =
+        location?.neighborhood && isNeighborhood(location.neighborhood)
+          ? location.neighborhood
+          : undefined
+
+      if (!neighborhood || !isBorough(neighborhood.borough)) return false
+      return neighborhood.borough.name === value
     },
   },
   {
@@ -166,3 +147,6 @@ export const columns: ColumnDef<ScheduledRun>[] = [
     },
   },
 ]
+
+// Export the type for use in other components
+export type { ScheduleItem }

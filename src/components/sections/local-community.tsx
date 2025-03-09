@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import config from '@/payload.config'
 import { Neighborhood, RunClub } from '@/payload-types'
+import { ensureBorough, ensureMedia } from '@/lib/utils/payload-transforms'
 
 async function getLocalCommunityData() {
   const payload = await getPayload({ config: await config })
@@ -30,8 +31,10 @@ async function getLocalCommunityData() {
     (acc, borough) => {
       acc[borough.slug] = {
         ...borough,
-        neighborhoods: neighborhoodsResponse.docs.filter((n) => n.borough.id === borough.id),
-        clubs: clubsResponse.docs.filter((c) => c.borough.id === borough.id),
+        neighborhoods: neighborhoodsResponse.docs.filter(
+          (n) => ensureBorough(n.borough)?.id === borough.id,
+        ),
+        clubs: clubsResponse.docs.filter((c) => ensureBorough(c.borough)?.id === borough.id),
       }
       return acc
     },
@@ -81,9 +84,9 @@ export default async function LocalCommunity() {
                             className="text-primary hover:underline flex items-center gap-2 py-1"
                           >
                             <span className="flex-1">{neighborhood.name}</span>
-                            {neighborhood.runningSpots?.length > 0 && (
+                            {(neighborhood.runningSpots?.length ?? 0) > 0 && (
                               <Badge variant="outline" className="text-xs">
-                                {neighborhood.runningSpots.length} spots
+                                {neighborhood.runningSpots?.length ?? 0} spots
                               </Badge>
                             )}
                           </Link>
@@ -98,7 +101,7 @@ export default async function LocalCommunity() {
                     <h3 className="font-semibold text-lg mb-2">Popular Running Routes</h3>
                     <ul className="space-y-1">
                       {borough.neighborhoods
-                        ?.filter((n) => n.runningSpots?.length > 0)
+                        ?.filter((n: Neighborhood) => (n.runningSpots?.length ?? 0) > 0)
                         .slice(0, 5)
                         .map((neighborhood: Neighborhood) => (
                           <li key={neighborhood.id}>
@@ -126,25 +129,28 @@ export default async function LocalCommunity() {
                       {borough.clubs?.slice(0, 5).map((club: RunClub) => (
                         <li key={club.id}>
                           <Link
-                            href={`/run-clubs/${club.id}`}
+                            href={`/run-clubs/${club.slug}`}
                             className="group flex items-center gap-3 hover:text-primary"
                           >
-                            {club.logo ? (
-                              <div className="relative h-8 w-8 rounded-full overflow-hidden bg-muted">
-                                <Image
-                                  src={club.logo.url}
-                                  alt={club.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span className="text-sm font-medium text-primary">
-                                  {club.name.charAt(0)}
-                                </span>
-                              </div>
-                            )}
+                            {(() => {
+                              const logo = ensureMedia(club.logo)
+                              return logo?.url ? (
+                                <div className="relative h-8 w-8 rounded-full overflow-hidden bg-muted">
+                                  <Image
+                                    src={logo.url}
+                                    alt={club.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <span className="text-sm font-medium text-primary">
+                                    {club.name.charAt(0)}
+                                  </span>
+                                </div>
+                              )
+                            })()}
                             <span className="text-sm font-medium group-hover:underline line-clamp-1">
                               {club.name}
                             </span>

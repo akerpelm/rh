@@ -1,10 +1,25 @@
 import { CollectionConfig } from 'payload'
+import slugify from 'slugify'
 
 export const RunClubs: CollectionConfig = {
   slug: 'run-clubs',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'borough', 'updatedAt'],
+  },
+  hooks: {
+    beforeChange: [
+      ({ data }) => {
+        if (data.name) {
+          data.slug = slugify(data.name, {
+            lower: true,
+            strict: true,
+            remove: /[*+~.()'"!:@]/g,
+          })
+        }
+        return data
+      },
+    ],
   },
   access: {
     read: () => true,
@@ -15,6 +30,30 @@ export const RunClubs: CollectionConfig = {
       type: 'text',
       label: 'Club Name',
       required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Auto-generated from name',
+      },
+      hooks: {
+        beforeValidate: [
+          ({ siblingData }) => {
+            if (siblingData.name) {
+              return slugify(siblingData.name, {
+                lower: true,
+                strict: true,
+                remove: /[*+~.()'"!:@]/g,
+              })
+            }
+            return undefined
+          },
+        ],
+      },
+      unique: true,
+      index: true,
     },
     {
       name: 'description',
@@ -44,67 +83,13 @@ export const RunClubs: CollectionConfig = {
         return false
       },
     },
-    {
-      name: 'neighborhoods',
-      type: 'relationship',
-      relationTo: 'neighborhoods',
-      required: true,
-      hasMany: true,
-      filterOptions: ({ data }) => {
-        if (data?.borough) {
-          return {
-            borough: { equals: data.borough },
-          }
-        }
-        return false
-      },
-    },
-    {
-      name: 'meetingLocations',
-      type: 'array',
-      label: 'Meeting Locations',
-      admin: {
-        description: 'Add meeting locations first before creating schedule entries',
-      },
-      fields: [
-        {
-          name: 'locationName',
-          type: 'text',
-          label: 'Location Name',
-          required: true,
-        },
-        {
-          name: 'address',
-          type: 'text',
-          label: 'Address',
-          required: true,
-        },
-        {
-          name: 'coordinates',
-          type: 'group',
-          label: 'Coordinates',
-          fields: [
-            {
-              name: 'latitude',
-              type: 'text',
-              label: 'Latitude',
-            },
-            {
-              name: 'longitude',
-              type: 'text',
-              label: 'Longitude',
-            },
-          ],
-        },
-      ],
-    },
+
     {
       name: 'schedule',
       type: 'array',
       label: 'Schedule',
-      admin: {
-        condition: (data) => data?.meetingLocations?.length > 0,
-        description: 'Add meeting locations before adding schedule entries',
+      access: {
+        read: () => true,
       },
       fields: [
         {
@@ -316,6 +301,234 @@ export const RunClubs: CollectionConfig = {
       type: 'upload',
       label: 'Club Logo',
       relationTo: 'media',
+    },
+    {
+      name: 'brandColor',
+      type: 'text',
+      label: 'Brand Color',
+      admin: {
+        description: 'Hex color code (e.g., #FF5733)',
+      },
+      validate: (val: string | null | undefined) => {
+        if (!val) return true // Allow empty
+        return /^#[0-9A-F]{6}$/i.test(val) || 'Must be a valid hex color (e.g., #FF5733)'
+      },
+    },
+    {
+      name: 'clubRecords',
+      type: 'array',
+      label: 'Club Records',
+      fields: [
+        {
+          name: 'athleteName',
+          type: 'text',
+        },
+        {
+          name: 'event',
+          type: 'select',
+          options: [
+            { label: 'Mile', value: 'mile' },
+            { label: '5K', value: '5k' },
+            { label: '10K', value: '10k' },
+            { label: 'Half Marathon', value: 'half' },
+            { label: 'Marathon', value: 'marathon' },
+          ],
+        },
+        {
+          name: 'time',
+          type: 'text', // HH:MM:SS format
+        },
+        {
+          name: 'date',
+          type: 'date',
+        },
+        {
+          name: 'eventName',
+          type: 'text', // e.g., "NYC Marathon 2023"
+        },
+      ],
+    },
+    {
+      name: 'gallery',
+      type: 'array',
+      label: 'Photo Gallery',
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+        {
+          name: 'caption',
+          type: 'text',
+          label: 'Caption',
+        },
+        {
+          name: 'featured',
+          type: 'checkbox',
+          label: 'Feature on profile',
+        },
+        {
+          name: 'category',
+          type: 'select',
+          options: [
+            { label: 'Group Runs', value: 'runs' },
+            { label: 'Social Events', value: 'social' },
+            { label: 'Race Day', value: 'race' },
+            { label: 'Community', value: 'community' },
+          ],
+        },
+      ],
+    },
+
+    {
+      name: 'clubCulture',
+      type: 'group',
+      label: 'Club Culture',
+      fields: [
+        {
+          name: 'postRunTraditions',
+          type: 'select',
+          hasMany: true,
+          options: [
+            { label: 'Coffee', value: 'coffee' },
+            { label: 'Breakfast', value: 'breakfast' },
+            { label: 'Group Stretching', value: 'stretch' },
+            { label: 'Social Hour', value: 'social' },
+          ],
+        },
+        {
+          name: 'atmosphere',
+          type: 'select',
+          hasMany: true,
+          options: [
+            { label: 'No Drop Policy', value: 'no-drop' },
+            { label: 'Pace Groups', value: 'pace-groups' },
+            { label: 'All Levels Welcome', value: 'all-levels' },
+            { label: 'Beginner Friendly', value: 'beginner' },
+            { label: 'Photography Encouraged', value: 'photos' },
+            { label: 'Dog Friendly', value: 'dog-friendly' },
+            { label: 'Stroller Friendly', value: 'stroller' },
+          ],
+        },
+        {
+          name: 'customTraditions',
+          type: 'array',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      name: 'partnerBusinesses',
+      type: 'array',
+      label: 'Local Partners',
+      fields: [
+        {
+          name: 'businessName',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'type',
+          type: 'select',
+          required: true,
+          options: [
+            { label: 'Running Store', value: 'running-store' },
+            { label: 'Coffee Shop', value: 'coffee' },
+            { label: 'Physical Therapy', value: 'pt' },
+            { label: 'Restaurant', value: 'restaurant' },
+            { label: 'Gym', value: 'gym' },
+            { label: 'Other', value: 'other' },
+          ],
+        },
+        {
+          name: 'perks',
+          type: 'text',
+          label: 'Member Perks',
+        },
+        {
+          name: 'location',
+          type: 'group',
+          fields: [
+            {
+              name: 'address',
+              type: 'text',
+            },
+            {
+              name: 'neighborhood',
+              type: 'relationship',
+              relationTo: 'neighborhoods',
+              hasMany: false,
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      name: 'routes',
+      type: 'array',
+      label: 'Common Routes',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'distance',
+          type: 'number',
+          label: 'Distance (miles)',
+          min: 0,
+          max: 100,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+        },
+        {
+          name: 'stravaLink',
+          type: 'text',
+          label: 'Strava Route Link',
+        },
+        {
+          name: 'difficulty',
+          type: 'select',
+          options: [
+            { label: 'Easy', value: 'easy' },
+            { label: 'Moderate', value: 'moderate' },
+            { label: 'Challenging', value: 'hard' },
+          ],
+        },
+        {
+          name: 'terrain',
+          type: 'select',
+          hasMany: true,
+          options: [
+            { label: 'Road', value: 'road' },
+            { label: 'Trail', value: 'trail' },
+            { label: 'Track', value: 'track' },
+            { label: 'Hills', value: 'hills' },
+          ],
+        },
+        {
+          name: 'mapImage',
+          type: 'upload',
+          relationTo: 'media',
+        },
+      ],
     },
   ],
 }
