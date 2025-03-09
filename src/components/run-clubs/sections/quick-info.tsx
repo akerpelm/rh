@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Mail, Phone, Globe, MapPin } from 'lucide-react'
+import { Mail, Phone, Globe, MapPin, ExternalLink } from 'lucide-react'
 import { RunClub } from '@/payload-types'
 import { ensureNeighborhood } from '@/lib/utils/payload-transforms'
 import Link from 'next/link'
@@ -44,7 +44,7 @@ export function QuickInfo({ club }: QuickInfoProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
             >
-              <Globe className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4" />
               <span>Website</span>
             </Link>
           )}

@@ -34,24 +34,28 @@ export function RunClubProfile({ club }: RunClubProfileProps) {
     : {}
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        backgroundColor: `${club.brandColor}08`,
-      }}
-    >
-      {/* Full-width container for background colors */}
-      <div className="w-full">
-        {/* Centered content container */}
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          {/* Hero Section */}
+    <div className="relative min-h-screen">
+      {/* Background gradient container */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: club.brandColor
+            ? `radial-gradient(
+                60% 90% at 50% 50%,
+                ${club.brandColor}15 0%,
+                ${club.brandColor}08 45%,
+                transparent 100%
+              )`
+            : undefined,
+        }}
+      />
+
+      {/* Content container */}
+      <div className="relative w-full">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <div
-              className="relative rounded-xl overflow-hidden bg-gradient-to-b from-[var(--club-color-light,_var(--muted))] to-background p-6 mb-8"
-              style={clubThemeStyles}
-            >
+            <div className="relative rounded-xl overflow-hidden p-6 mb-8" style={clubThemeStyles}>
               <div className="flex flex-col md:flex-row gap-8">
-                {/* Logo Section */}
                 <div className="flex flex-col items-center md:items-start">
                   <div className="relative h-32 w-32 md:h-40 md:w-40 rounded-2xl overflow-hidden bg-background shadow-lg">
                     {logo?.url ? (
@@ -76,7 +80,6 @@ export function RunClubProfile({ club }: RunClubProfileProps) {
                   <div className="flex gap-4 mt-6 md:hidden">{renderSocialLinks(club)}</div>
                 </div>
 
-                {/* Club Info */}
                 <div className="flex-1">
                   <div className="flex flex-col gap-4">
                     <div>
@@ -103,7 +106,6 @@ export function RunClubProfile({ club }: RunClubProfileProps) {
 
                     <p className="text-muted-foreground text-lg">{club.description}</p>
 
-                    {/* Social Links - Desktop */}
                     <div className="hidden md:flex gap-4">{renderSocialLinks(club)}</div>
                   </div>
                 </div>
@@ -111,9 +113,7 @@ export function RunClubProfile({ club }: RunClubProfileProps) {
             </div>
           </div>
 
-          {/* Main content grid */}
           <div className="relative grid lg:grid-cols-3 gap-8">
-            {/* Mobile-only info section */}
             <div className="lg:hidden space-y-4">
               <QuickInfo club={club} />
               <Card>
@@ -143,7 +143,7 @@ export function RunClubProfile({ club }: RunClubProfileProps) {
               </FadeInSection>
 
               {/* Routes Section */}
-              {club.routes?.length > 0 && (
+              {club.routes && club.routes.length > 0 && (
                 <FadeInSection>
                   <Card>
                     <CardHeader>
@@ -157,7 +157,7 @@ export function RunClubProfile({ club }: RunClubProfileProps) {
               )}
 
               {/* Gallery Section */}
-              {club.gallery?.length > 0 && (
+              {club.gallery && club.gallery?.length > 0 && (
                 <FadeInSection>
                   <Card>
                     <CardHeader>

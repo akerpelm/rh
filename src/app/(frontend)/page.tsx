@@ -11,27 +11,38 @@ import {
   LocalCommunitySkeleton,
   PopularClubsSkeleton,
 } from '@/components/skeletons'
+import { FadeInSection } from '@/components/animations/fade-in-section'
 
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
+      <FadeInSection>
+        <HeroSection />
+      </FadeInSection>
 
-      <Suspense fallback={<WeeklyScheduleSkeleton />}>
-        <WeeklySchedule />
-      </Suspense>
+      <FadeInSection>
+        <Suspense fallback={<WeeklyScheduleSkeleton />}>
+          <WeeklySchedule />
+        </Suspense>
+      </FadeInSection>
 
-      <Suspense fallback={<LocalCommunitySkeleton />}>
-        <LocalCommunity />
-      </Suspense>
+      <FadeInSection>
+        <Suspense fallback={<LocalCommunitySkeleton />}>
+          <LocalCommunity />
+        </Suspense>
+      </FadeInSection>
 
-      <Suspense fallback={<PopularClubsSkeleton />}>
-        <PopularClubs />
-      </Suspense>
+      <FadeInSection>
+        <Suspense fallback={<PopularClubsSkeleton />}>
+          <PopularClubs />
+        </Suspense>
+      </FadeInSection>
 
-      <Testimonials />
-      <Newsletter />
-      <PartnerLogos />
+      <FadeInSection>
+        <Testimonials />
+        <Newsletter />
+        <PartnerLogos />
+      </FadeInSection>
     </>
   )
 }

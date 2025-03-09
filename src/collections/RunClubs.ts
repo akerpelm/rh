@@ -235,6 +235,44 @@ export const RunClubs: CollectionConfig = {
             condition: (_, siblingData) => siblingData?.requiresRSVP,
           },
         },
+        {
+          name: 'route',
+          type: 'group',
+          label: 'Run Route',
+          admin: {
+            description: 'Optional route information for this run',
+          },
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              label: 'Route Name',
+            },
+            {
+              name: 'distance',
+              type: 'number',
+              label: 'Distance (miles)',
+            },
+            {
+              name: 'mapProvider',
+              type: 'select',
+              label: 'Map Provider',
+              options: [
+                { label: 'On The Go Map', value: 'onthego' },
+                { label: 'Strava', value: 'strava' },
+                { label: 'MapMyRun', value: 'mapmyrun' },
+              ],
+            },
+            {
+              name: 'mapUrl',
+              type: 'text',
+              label: 'Map URL',
+              admin: {
+                description: 'Full URL to the route map',
+              },
+            },
+          ],
+        },
       ],
     },
     {
@@ -322,10 +360,22 @@ export const RunClubs: CollectionConfig = {
         {
           name: 'athleteName',
           type: 'text',
+          required: true,
+        },
+        {
+          name: 'category',
+          type: 'select',
+          required: true,
+          options: [
+            { label: 'Men', value: 'men' },
+            { label: 'Women', value: 'women' },
+            { label: 'Non-Binary', value: 'non-binary' },
+          ],
         },
         {
           name: 'event',
           type: 'select',
+          required: true,
           options: [
             { label: 'Mile', value: 'mile' },
             { label: '5K', value: '5k' },
@@ -336,7 +386,11 @@ export const RunClubs: CollectionConfig = {
         },
         {
           name: 'time',
-          type: 'text', // HH:MM:SS format
+          type: 'text',
+          required: true,
+          admin: {
+            description: 'Format: HH:MM:SS',
+          },
         },
         {
           name: 'date',
@@ -344,9 +398,13 @@ export const RunClubs: CollectionConfig = {
         },
         {
           name: 'eventName',
-          type: 'text', // e.g., "NYC Marathon 2023"
+          type: 'text',
         },
       ],
+      admin: {
+        initCollapsed: true,
+        description: 'Records are maintained separately for men, women, and non-binary athletes',
+      },
     },
     {
       name: 'gallery',
@@ -421,10 +479,6 @@ export const RunClubs: CollectionConfig = {
               type: 'text',
               required: true,
             },
-            {
-              name: 'description',
-              type: 'textarea',
-            },
           ],
         },
       ],
@@ -433,7 +487,7 @@ export const RunClubs: CollectionConfig = {
     {
       name: 'partnerBusinesses',
       type: 'array',
-      label: 'Local Partners',
+      label: 'Partners',
       fields: [
         {
           name: 'businessName',
@@ -441,11 +495,28 @@ export const RunClubs: CollectionConfig = {
           required: true,
         },
         {
+          name: 'businessURL',
+          label: 'Business Website',
+          type: 'text',
+          admin: {
+            description: 'URL to the business website',
+          },
+        },
+        {
+          name: 'internalURL',
+          label: 'Internal Website',
+          type: 'text',
+          admin: {
+            description: 'URL to the partnerships on your website',
+          },
+        },
+        {
           name: 'type',
           type: 'select',
           required: true,
           options: [
             { label: 'Running Store', value: 'running-store' },
+            { label: 'Brand', value: 'brand' },
             { label: 'Coffee Shop', value: 'coffee' },
             { label: 'Physical Therapy', value: 'pt' },
             { label: 'Restaurant', value: 'restaurant' },

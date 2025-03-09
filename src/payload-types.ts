@@ -216,6 +216,18 @@ export interface RunClub {
         details?: string | null;
         requiresRSVP?: boolean | null;
         maxParticipants?: number | null;
+        /**
+         * Optional route information for this run
+         */
+        route?: {
+          name?: string | null;
+          distance?: number | null;
+          mapProvider?: ('onthego' | 'strava' | 'mapmyrun') | null;
+          /**
+           * Full URL to the route map
+           */
+          mapUrl?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -237,11 +249,18 @@ export interface RunClub {
    * Hex color code (e.g., #FF5733)
    */
   brandColor?: string | null;
+  /**
+   * Records are maintained separately for men, women, and non-binary athletes
+   */
   clubRecords?:
     | {
-        athleteName?: string | null;
-        event?: ('mile' | '5k' | '10k' | 'half' | 'marathon') | null;
-        time?: string | null;
+        athleteName: string;
+        category: 'men' | 'women' | 'non-binary';
+        event: 'mile' | '5k' | '10k' | 'half' | 'marathon';
+        /**
+         * Format: HH:MM:SS
+         */
+        time: string;
         date?: string | null;
         eventName?: string | null;
         id?: string | null;
@@ -264,7 +283,6 @@ export interface RunClub {
     customTraditions?:
       | {
           name: string;
-          description?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -272,7 +290,15 @@ export interface RunClub {
   partnerBusinesses?:
     | {
         businessName: string;
-        type: 'running-store' | 'coffee' | 'pt' | 'restaurant' | 'gym' | 'other';
+        /**
+         * URL to the business website
+         */
+        businessURL?: string | null;
+        /**
+         * URL to the partnerships on your website
+         */
+        internalURL?: string | null;
+        type: 'running-store' | 'brand' | 'coffee' | 'pt' | 'restaurant' | 'gym' | 'other';
         perks?: string | null;
         location?: {
           address?: string | null;
@@ -502,6 +528,14 @@ export interface RunClubsSelect<T extends boolean = true> {
         details?: T;
         requiresRSVP?: T;
         maxParticipants?: T;
+        route?:
+          | T
+          | {
+              name?: T;
+              distance?: T;
+              mapProvider?: T;
+              mapUrl?: T;
+            };
         id?: T;
       };
   contactInformation?:
@@ -527,6 +561,7 @@ export interface RunClubsSelect<T extends boolean = true> {
     | T
     | {
         athleteName?: T;
+        category?: T;
         event?: T;
         time?: T;
         date?: T;
@@ -551,7 +586,6 @@ export interface RunClubsSelect<T extends boolean = true> {
           | T
           | {
               name?: T;
-              description?: T;
               id?: T;
             };
       };
@@ -559,6 +593,8 @@ export interface RunClubsSelect<T extends boolean = true> {
     | T
     | {
         businessName?: T;
+        businessURL?: T;
+        internalURL?: T;
         type?: T;
         perks?: T;
         location?:
