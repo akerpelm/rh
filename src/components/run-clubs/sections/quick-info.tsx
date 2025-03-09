@@ -3,6 +3,9 @@ import { Mail, Phone, Globe, MapPin, ExternalLink } from 'lucide-react'
 import { RunClub } from '@/payload-types'
 import { ensureNeighborhood } from '@/lib/utils/payload-transforms'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import { ClubMap } from '@/components/maps/club-map'
+import { MapSkeleton } from '@/components/maps/map-skeleton'
 
 interface QuickInfoProps {
   club: RunClub
@@ -52,11 +55,16 @@ export function QuickInfo({ club }: QuickInfoProps) {
 
         {/* Location */}
         {neighborhood && (
-          <div className="flex items-start gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mt-0.5" />
-            <div>
-              <p>Based in {neighborhood.name}</p>
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4 mt-0.5" />
+              <div>
+                <p>Based in {neighborhood.name}</p>
+              </div>
             </div>
+            <Suspense fallback={<MapSkeleton />}>
+              <ClubMap club={club} />
+            </Suspense>
           </div>
         )}
 

@@ -45,7 +45,7 @@ export function transformRunClubData(club: RunClub) {
     logo: ensureMedia(club.logo),
     borough: ensureBorough(club.borough),
     primaryNeighborhood: ensureNeighborhood(club.primaryNeighborhood),
-    schedule: club.schedule?.map((run: any) => ({
+    schedule: club.schedule?.map((run) => ({
       ...run,
       meetingLocation: {
         ...run.meetingLocation,

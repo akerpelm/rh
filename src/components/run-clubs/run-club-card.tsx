@@ -1,106 +1,122 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { Instagram } from 'lucide-react'
-import { StravaIcon } from '@/components/icons'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ensureValidURL } from '@/lib/utils/urls'
-import { RunClub } from '@/payload-types'
-import { ensureBorough, ensureMedia } from '@/lib/utils/payload-transforms'
+import { RunClub, Borough, Neighborhood } from '@/payload-types'
+import { MapPin, Calendar, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { ensureNeighborhood } from '@/lib/utils/payload-transforms'
+import { capitalize } from 'lodash'
 
 interface RunClubCardProps {
   club: RunClub
 }
 
 export function RunClubCard({ club }: RunClubCardProps) {
-  const logo = ensureMedia(club.logo)
-  const borough = ensureBorough(club.borough)
+  // Get borough and neighborhood info
+  const borough = club.borough as Borough
+  const neighborhood = ensureNeighborhood(club.primaryNeighborhood)
+
+  // Get run days (unique)
+  const runDays = Array.from(new Set(club.schedule?.map((run) => run.day) || []))
+
+  // Format run days for display
+  const formatRunDays = () => {
+    if (!runDays.length) return 'No scheduled runs'
+
+    if (runDays.length <= 3) {
+      return runDays.map(capitalize).join(', ')
+    }
+
+    return `${runDays.length} days/week`
+  }
+
+  // Get run types
+  const runTypes = Array.from(new Set(club.schedule?.map((run) => run.runType) || []))
+
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex gap-4 mb-4">
-          {logo?.url ? (
-            <div className="relative h-16 w-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-              <Image src={logo.url} alt={club.name} fill className="object-contain" />
-            </div>
-          ) : (
-            <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-muted-foreground">
-                {club.name.charAt(0)}
+    <Link href={`/run-clubs/${club.slug}`} className="block group">
+      <Card className="h-full overflow-hidden hover:shadow-md transition-shadow">
+        {club.logo ? (
+          <div className="relative w-full h-32 bg-muted">
+            <Image
+              src={club.logo.url || ''}
+              alt={club.name}
+              fill
+              className="object-cover object-center"
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to bottom, transparent 60%, ${club.brandColor || '#000'})`,
+                opacity: 0.1,
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            className="w-full h-32"
+            style={{ backgroundColor: club.brandColor || 'var(--muted)' }}
+          />
+        )}
+
+        <CardContent className="p-4">
+          <h3
+            className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors truncate"
+            style={{ color: club.brandColor || undefined }}
+          >
+            {club.name}
+          </h3>
+
+          {(borough || neighborhood) && (
+            <div className="flex items-center text-xs text-muted-foreground mb-3">
+              <MapPin className="h-3 w-3 shrink-0 mr-1" />
+              <span className="truncate">
+                {neighborhood?.name && `${neighborhood.name}, `}
+                {borough?.name || ''}
               </span>
             </div>
           )}
-          <div className="flex-1">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="font-bold text-lg line-clamp-1">{club.name}</h3>
-              <Badge variant="secondary" className="flex-shrink-0">
-                {borough?.name}
+
+          <p className="text-sm line-clamp-2 mb-3 text-muted-foreground">{club.description}</p>
+
+          {runDays.length > 0 && (
+            <div className="flex items-center text-xs text-muted-foreground mb-3">
+              <Calendar className="h-3 w-3 shrink-0 mr-1" />
+              <span>{formatRunDays()}</span>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {runTypes.slice(0, 3).map((type) => (
+              <Badge
+                key={type}
+                variant="secondary"
+                className="text-[10px]"
+                style={{
+                  backgroundColor: `${club.brandColor}15` || undefined,
+                  color: club.brandColor || undefined,
+                }}
+              >
+                {capitalize(type)}
               </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-              {typeof club.description === 'string' ? club.description : ''}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          {club.schedule?.slice(0, 2).map((run, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 text-sm border-l-2 border-primary/20 pl-3"
-            >
-              <div className="flex-1">
-                <p className="font-medium capitalize">
-                  {run.day}s @ {run.time}
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  {run.runType === 'workout'
-                    ? '🏃 Workout'
-                    : run.runType === 'long'
-                      ? '🛣️ Long Run'
-                      : run.runType === 'easy'
-                        ? '😌 Easy Run'
-                        : run.runType === 'social'
-                          ? '🤝 Social Run'
-                          : run.runType}
-                </p>
-              </div>
-              {run.distance?.min && run.distance?.max && (
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {run.distance.min}-{run.distance.max}mi
-                </span>
-              )}
-            </div>
-          ))}
-
-          <div className="flex gap-2 mt-4">
-            {club.socialMedia?.instagram && (
-              <Link
-                href={ensureValidURL(club.socialMedia.instagram)}
-                className="text-muted-foreground hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Instagram className="h-4 w-4" />
-              </Link>
+            ))}
+            {runTypes.length > 3 && (
+              <Badge variant="outline" className="text-[10px]">
+                +{runTypes.length - 3} more
+              </Badge>
             )}
-            {club.socialMedia?.strava && (
-              <Link
-                href={ensureValidURL(club.socialMedia.strava)}
-                className="text-muted-foreground hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <StravaIcon className="h-4 w-4" />
-              </Link>
-            )}
-            <Button variant="outline" size="sm" className="ml-auto" asChild>
-              <Link href={`/run-clubs/${club.slug}`}>View Details</Link>
-            </Button>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+
+        <CardFooter className="p-4 pt-0 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {club.schedule?.length || 0} run{club.schedule?.length !== 1 ? 's' : ''} per week
+          </span>
+          <span className="text-xs flex items-center font-medium group-hover:text-primary transition-colors">
+            View details <ArrowRight className="ml-1 h-3 w-3" />
+          </span>
+        </CardFooter>
+      </Card>
+    </Link>
   )
 }

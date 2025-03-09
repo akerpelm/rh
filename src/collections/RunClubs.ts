@@ -1,5 +1,6 @@
 import { CollectionConfig } from 'payload'
 import slugify from 'slugify'
+import { geocodeAddress } from '../lib/utils/geocoding'
 
 export const RunClubs: CollectionConfig = {
   slug: 'run-clubs',
@@ -87,6 +88,38 @@ export const RunClubs: CollectionConfig = {
     {
       name: 'schedule',
       type: 'array',
+      hooks: {
+        beforeChange: [
+          async ({ value }) => {
+            if (!Array.isArray(value)) return value
+
+            const updatedSchedule = await Promise.all(
+              value.map(async (item) => {
+                if (!item.meetingLocation?.address) return item
+
+                // Only geocode if coordinates are missing
+                if (!item.meetingLocation.coordinates?.latitude) {
+                  const result = await geocodeAddress(item.meetingLocation.address)
+                  if (result) {
+                    return {
+                      ...item,
+                      meetingLocation: {
+                        ...item.meetingLocation,
+                        coordinates: {
+                          latitude: result.lat,
+                          longitude: result.lon,
+                        },
+                      },
+                    }
+                  }
+                }
+                return item
+              }),
+            )
+            return updatedSchedule
+          },
+        ],
+      },
       label: 'Schedule',
       access: {
         read: () => true,
