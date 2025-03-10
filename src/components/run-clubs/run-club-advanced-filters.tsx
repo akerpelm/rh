@@ -9,15 +9,19 @@ import {
 } from '@/components/ui/select'
 import { Calendar, Timer, UserCheck, Coffee } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { RunClubFilters } from '@/lib/api/run-clubs'
+
+// Define a more specific type for the parameters used by this component
+export interface AdvancedFiltersParams {
+  dayFilter: RunClubFilters['dayFilter'] | null
+  pace: RunClubFilters['pace'] | null
+  atmosphere: RunClubFilters['atmosphere'] | null
+  postRun: RunClubFilters['postRun'] | null
+}
 
 interface AdvancedFiltersProps {
-  searchParams: {
-    dayFilter?: string
-    pace?: string
-    atmosphere?: string
-    postRun?: string
-  }
-  onFilterChange: (key: string, value: string | null) => void
+  searchParams: AdvancedFiltersParams
+  onFilterChange: (key: keyof AdvancedFiltersParams, value: string | null) => void
   className?: string
 }
 

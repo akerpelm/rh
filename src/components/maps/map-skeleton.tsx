@@ -1,5 +1,4 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { MapPin } from 'lucide-react'
 
@@ -9,8 +8,22 @@ interface MapSkeletonProps {
 
 export function MapSkeleton({ className }: MapSkeletonProps) {
   return (
-    <Card className={cn('relative overflow-hidden', className)}>
-      <div className="h-[320px] w-full bg-muted/20 relative">
+    <div className={cn('relative w-full h-full flex', className)}>
+      {/* Sidebar skeleton */}
+      <div className="w-80 bg-card border-r">
+        <div className="p-4 border-b">
+          <Skeleton className="h-5 w-32 mb-2" />
+          <Skeleton className="h-3 w-24" />
+        </div>
+        <div className="p-2 space-y-1.5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+
+      {/* Map skeleton */}
+      <div className="flex-1 bg-muted/20 relative">
         {/* Map grid lines */}
         <div className="absolute inset-0 grid grid-cols-4 grid-rows-4">
           {Array.from({ length: 16 }).map((_, i) => (
@@ -34,9 +47,9 @@ export function MapSkeleton({ className }: MapSkeletonProps) {
           </div>
           <div className="mt-4 text-sm font-medium">Loading map...</div>
           <div className="mt-2 flex gap-1.5">
-            <Skeleton className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse" />
-            <Skeleton className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse delay-150" />
-            <Skeleton className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse delay-300" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse delay-150" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse delay-300" />
           </div>
         </div>
 
@@ -45,12 +58,7 @@ export function MapSkeleton({ className }: MapSkeletonProps) {
           <Skeleton className="h-6 w-6 rounded" />
           <Skeleton className="h-6 w-6 rounded" />
         </div>
-
-        {/* Attribution mockup */}
-        <div className="absolute bottom-2 left-2">
-          <Skeleton className="h-3 w-24 rounded" />
-        </div>
       </div>
-    </Card>
+    </div>
   )
 }

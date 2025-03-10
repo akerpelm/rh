@@ -80,10 +80,13 @@ export function Navbar({ user }: { user: User }) {
                       <Link href="/run-clubs">Browse All Clubs</Link>
                     </li>
                     <li>
-                      <Link href="/run-clubs/manhattan">Manhattan Clubs</Link>
+                      <Link href="/run-clubs?borough=2">Manhattan Clubs</Link>
                     </li>
                     <li>
                       <Link href="/run-clubs/brooklyn">Brooklyn Clubs</Link>
+                    </li>
+                    <li>
+                      <Link href="/run-clubs?borough=1">Queens Clubs</Link>
                     </li>
                     <li>
                       <Link href="/run-clubs/map">Club Map</Link>

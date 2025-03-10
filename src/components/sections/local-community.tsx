@@ -7,8 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import config from '@/payload.config'
-import { Neighborhood, RunClub } from '@/payload-types'
+import { Borough, Neighborhood, RunClub } from '@/payload-types'
 import { ensureBorough, ensureMedia } from '@/lib/utils/payload-transforms'
+
+// Create a proper type for the extended borough data
+interface ExtendedBorough extends Borough {
+  neighborhoods: Neighborhood[]
+  clubs: RunClub[]
+}
 
 async function getLocalCommunityData() {
   const payload = await getPayload({ config: await config })
@@ -27,7 +33,7 @@ async function getLocalCommunityData() {
     }),
   ])
 
-  const boroughs = boroughsResponse.docs.reduce(
+  const boroughs = boroughsResponse.docs.reduce<Record<string, ExtendedBorough>>(
     (acc, borough) => {
       acc[borough.slug] = {
         ...borough,
@@ -38,7 +44,7 @@ async function getLocalCommunityData() {
       }
       return acc
     },
-    {} as Record<string, any>,
+    {} as Record<string, ExtendedBorough>,
   )
 
   return { boroughs }

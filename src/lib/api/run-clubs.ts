@@ -51,7 +51,8 @@ export async function getRunClubs({
   pace,
   atmosphere,
   postRun,
-}: RunClubFilters) {
+  limit = 12, // Add limit parameter with default
+}: RunClubFilters & { limit?: number }) {
   // Create a cache key based on the request parameters
   const cacheKey = JSON.stringify({
     borough,
@@ -63,6 +64,7 @@ export async function getRunClubs({
     pace,
     atmosphere,
     postRun,
+    limit,
   })
 
   // Check cache
@@ -73,7 +75,7 @@ export async function getRunClubs({
   }
 
   const payload = await getPayload({ config })
-  const limit = 12
+  // Use the provided limit or default to 12
   const filters: Where[] = []
 
   // Borough filter
@@ -92,7 +94,7 @@ export async function getRunClubs({
   }
 
   // Day-based filters - ensure proper string comparison
-  if (dayFilter && dayFilter !== 'all') {
+  if (dayFilter && dayFilter !== undefined) {
     const nowDate = new Date()
     const today = format(nowDate, 'EEEE').toLowerCase()
 
@@ -186,14 +188,14 @@ export async function getRunClubs({
       where,
       sort: sortOption,
       page,
-      limit,
+      limit, // Use the passed limit
       depth: 2, // Load relationships
     })
 
     const response = {
       runClubs: result.docs as RunClub[],
       total: result.totalDocs,
-      page: result.page,
+      page: result.page || 1,
       totalPages: result.totalPages,
     }
 

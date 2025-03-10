@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Separator } from '@/components/ui/separator'
-import { getRunClubs } from '@/lib/api/run-clubs'
+import { getRunClubs, RunClubFilters as RunClubFilterTypes } from '@/lib/api/run-clubs'
 import { RunClubsHeader } from '@/components/run-clubs/run-clubs-header'
 import { RunClubFilters } from '@/components/run-clubs/run-club-filters'
 import { RunClubsSkeletonList } from '@/components/run-clubs/run-clubs-skeleton'
@@ -106,23 +106,21 @@ async function RunClubResults({
     }
   }
 
-  const {
-    runClubs,
-    total,
-    page: resultPage,
-    totalPages,
-  } = await getRunClubs({
+  // Create properly typed filter parameters
+  const filterParams: RunClubFilterTypes = {
     borough,
     neighborhood,
     search,
     sort,
     page,
-    // Only pass the remaining filters
-    dayFilter: dayFilter as any,
-    pace: pace as any,
-    atmosphere: atmosphere as any,
-    postRun: postRun as any,
-  })
+    // Type-safe filter values using the defined types
+    dayFilter: dayFilter as RunClubFilterTypes['dayFilter'],
+    pace: pace as RunClubFilterTypes['pace'],
+    atmosphere: atmosphere as RunClubFilterTypes['atmosphere'],
+    postRun: postRun as RunClubFilterTypes['postRun'],
+  }
+
+  const { runClubs, total, page: resultPage, totalPages } = await getRunClubs(filterParams)
 
   return (
     <RunClubList runClubs={runClubs} total={total} page={resultPage || 1} totalPages={totalPages} />
